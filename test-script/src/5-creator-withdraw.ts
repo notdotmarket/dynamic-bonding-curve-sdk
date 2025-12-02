@@ -37,13 +37,12 @@ async function getQuoteBalance(
 
 async function creatorWithdrawSurplus(
     client: DynamicBondingCurveClient,
+    connection: any,
     creator: any,
     poolAddress: PublicKey
 ) {
     console.log('\n💰 CREATOR WITHDRAWING SURPLUS');
     console.log('===============================');
-    
-    const connection = client.program.provider.connection;
     
     // Get pool state
     const poolState = await client.state.getPool(poolAddress);
@@ -115,13 +114,12 @@ async function creatorWithdrawSurplus(
 
 async function partnerWithdrawSurplus(
     client: DynamicBondingCurveClient,
+    connection: any,
     partner: any,
     poolAddress: PublicKey
 ) {
     console.log('\n💰 PARTNER WITHDRAWING SURPLUS (for comparison)');
     console.log('================================================');
-    
-    const connection = client.program.provider.connection;
     
     // Get pool state
     const poolState = await client.state.getPool(poolAddress);
@@ -194,7 +192,7 @@ async function main() {
     }
     
     // Load token data
-    const tokenFilePath = join(process.cwd(), 'data', 'token.json');
+    const tokenFilePath = join(process.cwd(), 'data', 'token-fresh.json');
     if (!existsSync(tokenFilePath)) {
         console.error('❌ Token file not found! Please run script 2 first.');
         process.exit(1);
@@ -215,7 +213,7 @@ async function main() {
     const client = DynamicBondingCurveClient.create(connection, CONFIG.COMMITMENT);
     
     // Creator withdraws surplus
-    const creatorSig = await creatorWithdrawSurplus(client, creator, poolAddress);
+    const creatorSig = await creatorWithdrawSurplus(client, connection, creator, poolAddress);
     
     if (creatorSig) {
         console.log('\n✅ Creator withdrawal completed successfully!');
@@ -226,7 +224,7 @@ async function main() {
             console.log('   Demonstrating partner withdrawal as well...\n');
             
             await new Promise(resolve => setTimeout(resolve, 2000));
-            await partnerWithdrawSurplus(client, creator, poolAddress);
+            await partnerWithdrawSurplus(client, connection, creator, poolAddress);
         }
     }
     

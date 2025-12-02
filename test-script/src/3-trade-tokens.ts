@@ -44,6 +44,7 @@ async function getTokenBalance(
 
 async function buyTokens(
     client: DynamicBondingCurveClient,
+    connection: any,
     trader: any,
     poolAddress: PublicKey,
     tokenMint: PublicKey,
@@ -52,19 +53,7 @@ async function buyTokens(
     console.log('\n💰 BUYING TOKENS');
     console.log('================');
     
-    const connection = client.program.provider.connection;
-    
-    // Get quote for buy
-    console.log(`\n📊 Getting quote for ${displayAmount(amountIn, 9)} SOL...`);
-    const quote = await client.pool.getSwapQuote({
-        pool: poolAddress,
-        amountIn: amountIn.toString(),
-        swapBaseForQuote: false, // Buying base token with quote (SOL)
-    });
-    
-    console.log(`   Expected tokens: ${displayAmount(quote.amountOut, CONFIG.TOKEN.DECIMALS)} ${CONFIG.TOKEN.SYMBOL}`);
-    console.log(`   Fee: ${displayAmount(quote.fee, 9)} SOL`);
-    console.log(`   Price impact: ${quote.priceImpact.toFixed(4)}%`);
+    console.log(`\n📊 Buying with ${displayAmount(amountIn, 9)} SOL...`);
     
     // Get balances before
     const solBefore = await connection.getBalance(trader.publicKey);
@@ -74,9 +63,9 @@ async function buyTokens(
     console.log(`   SOL: ${displayAmount(solBefore, 9)}`);
     console.log(`   ${CONFIG.TOKEN.SYMBOL}: ${displayAmount(tokenBefore, CONFIG.TOKEN.DECIMALS)}`);
     
-    // Calculate minimum amount out with slippage
-    const slippageFactor = new BN(10000 - CONFIG.TRADING.SLIPPAGE_BPS);
-    const minAmountOut = new BN(quote.amountOut).mul(slippageFactor).div(new BN(10000));
+    // Set minimum amount out to 0 for simplicity (or use a small amount)
+    // In production, you'd calculate this based on expected output and slippage
+    const minAmountOut = new BN(0);
     
     console.log(`\n📤 Creating buy transaction...`);
     const swapTx = await client.pool.swap({
@@ -122,6 +111,7 @@ async function buyTokens(
 
 async function sellTokens(
     client: DynamicBondingCurveClient,
+    connection: any,
     trader: any,
     poolAddress: PublicKey,
     tokenMint: PublicKey,
@@ -130,19 +120,7 @@ async function sellTokens(
     console.log('\n💸 SELLING TOKENS');
     console.log('=================');
     
-    const connection = client.program.provider.connection;
-    
-    // Get quote for sell
-    console.log(`\n📊 Getting quote for ${displayAmount(amountIn, CONFIG.TOKEN.DECIMALS)} ${CONFIG.TOKEN.SYMBOL}...`);
-    const quote = await client.pool.getSwapQuote({
-        pool: poolAddress,
-        amountIn: amountIn.toString(),
-        swapBaseForQuote: true, // Selling base token for quote (SOL)
-    });
-    
-    console.log(`   Expected SOL: ${displayAmount(quote.amountOut, 9)}`);
-    console.log(`   Fee: ${displayAmount(quote.fee, CONFIG.TOKEN.DECIMALS)} ${CONFIG.TOKEN.SYMBOL}`);
-    console.log(`   Price impact: ${quote.priceImpact.toFixed(4)}%`);
+    console.log(`\n📊 Selling ${displayAmount(amountIn, CONFIG.TOKEN.DECIMALS)} ${CONFIG.TOKEN.SYMBOL}...`);
     
     // Get balances before
     const solBefore = await connection.getBalance(trader.publicKey);
@@ -152,9 +130,8 @@ async function sellTokens(
     console.log(`   SOL: ${displayAmount(solBefore, 9)}`);
     console.log(`   ${CONFIG.TOKEN.SYMBOL}: ${displayAmount(tokenBefore, CONFIG.TOKEN.DECIMALS)}`);
     
-    // Calculate minimum amount out with slippage
-    const slippageFactor = new BN(10000 - CONFIG.TRADING.SLIPPAGE_BPS);
-    const minAmountOut = new BN(quote.amountOut).mul(slippageFactor).div(new BN(10000));
+    // Set minimum amount out to 0 for simplicity
+    const minAmountOut = new BN(0);
     
     console.log(`\n📤 Creating sell transaction...`);
     const swapTx = await client.pool.swap({
@@ -217,7 +194,7 @@ async function main() {
     }
     
     // Load token data
-    const tokenFilePath = join(process.cwd(), 'data', 'token.json');
+    const tokenFilePath = join(process.cwd(), 'data', 'token-fresh.json');
     if (!existsSync(tokenFilePath)) {
         console.error('❌ Token file not found! Please run script 2 first.');
         process.exit(1);
@@ -241,7 +218,7 @@ async function main() {
     
     // BUY TOKENS
     const buyAmount = new BN(CONFIG.TRADING.BUY_AMOUNT_SOL * LAMPORTS_PER_SOL);
-    const tokensBought = await buyTokens(client, trader, poolAddress, tokenMint, buyAmount);
+    const tokensBought = await buyTokens(client, connection, trader, poolAddress, tokenMint, buyAmount);
     
     // Wait a bit
     console.log('\n⏳ Waiting 3 seconds before selling...');
@@ -249,7 +226,7 @@ async function main() {
     
     // SELL 50% OF TOKENS
     const sellAmount = new BN((tokensBought / 2n).toString());
-    await sellTokens(client, trader, poolAddress, tokenMint, sellAmount);
+    await sellTokens(client, connection, trader, poolAddress, tokenMint, sellAmount);
     
     console.log('\n✅ Trading completed successfully!');
     console.log('\n💡 Tip: You can run this script multiple times to test trading.');

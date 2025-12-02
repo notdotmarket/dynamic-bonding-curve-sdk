@@ -28,13 +28,12 @@ interface ConfigData {
 
 async function pauseTrading(
     client: DynamicBondingCurveClient,
+    connection: any,
     partner: any,
     poolAddress: PublicKey
 ) {
     console.log('\n⏸️  PAUSING TRADING');
     console.log('==================');
-    
-    const connection = client.program.provider.connection;
     
     console.log('\n📤 Creating pause transaction...');
     const pauseTx = await client.partner.pauseTrading({
@@ -68,13 +67,12 @@ async function pauseTrading(
 
 async function unpauseTrading(
     client: DynamicBondingCurveClient,
+    connection: any,
     partner: any,
     poolAddress: PublicKey
 ) {
     console.log('\n▶️  UNPAUSING TRADING');
     console.log('====================');
-    
-    const connection = client.program.provider.connection;
     
     console.log('\n📤 Creating unpause transaction...');
     const unpauseTx = await client.partner.unpauseTrading({
@@ -107,13 +105,12 @@ async function unpauseTrading(
 
 async function testSwapWhilePaused(
     client: DynamicBondingCurveClient,
+    connection: any,
     trader: any,
     poolAddress: PublicKey
 ) {
     console.log('\n🧪 TESTING SWAP WHILE PAUSED');
     console.log('============================');
-    
-    const connection = client.program.provider.connection;
     
     try {
         console.log('\n📤 Attempting to create swap transaction...');
@@ -167,7 +164,7 @@ async function main() {
     }
     
     // Load token data
-    const tokenFilePath = join(process.cwd(), 'data', 'token.json');
+    const tokenFilePath = join(process.cwd(), 'data', 'token-fresh.json');
     if (!existsSync(tokenFilePath)) {
         console.error('❌ Token file not found! Please run script 2 first.');
         process.exit(1);
@@ -208,32 +205,32 @@ async function main() {
     if (poolState.isPaused) {
         console.log('\n⚠️  Pool is currently PAUSED.');
         console.log('   Unpausing trading...\n');
-        await unpauseTrading(client, partner, poolAddress);
+        await unpauseTrading(client, connection, partner, poolAddress);
         
         // Optionally, pause it again after a delay
         console.log('\n⏳ Waiting 5 seconds before pausing again...');
         await sleep(5000);
-        await pauseTrading(client, partner, poolAddress);
+        await pauseTrading(client, connection, partner, poolAddress);
         
         // Test swap while paused
-        await testSwapWhilePaused(client, partner, poolAddress);
+        await testSwapWhilePaused(client, connection, partner, poolAddress);
         
         // Unpause again at the end
         console.log('\n⏳ Waiting 3 seconds before final unpause...');
         await sleep(3000);
-        await unpauseTrading(client, partner, poolAddress);
+        await unpauseTrading(client, connection, partner, poolAddress);
     } else {
         console.log('\n✅ Pool is currently ACTIVE.');
         console.log('   Pausing trading...\n');
-        await pauseTrading(client, partner, poolAddress);
+        await pauseTrading(client, connection, partner, poolAddress);
         
         // Test swap while paused
-        await testSwapWhilePaused(client, partner, poolAddress);
+        await testSwapWhilePaused(client, connection, partner, poolAddress);
         
         // Unpause after testing
         console.log('\n⏳ Waiting 3 seconds before unpausing...');
         await sleep(3000);
-        await unpauseTrading(client, partner, poolAddress);
+        await unpauseTrading(client, connection, partner, poolAddress);
     }
     
     console.log('\n✅ Pause/Unpause cycle completed successfully!');

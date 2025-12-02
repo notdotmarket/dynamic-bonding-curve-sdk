@@ -3,6 +3,59 @@
 All notable changes to the Dynamic Bonding Curve SDK will be documented in this file.
 
 
+## [1.5.0] - 2025-12-02
+
+### Added
+
+- **NoMigration Mode**: Added `NO_MIGRATION = 2` option to `MigrationOption` enum
+  - Allows pools without DEX migration requirement
+  - Partners, creators, and protocol can withdraw surplus at any time
+  - No need to wait for migration threshold
+  - 90% of quote reserve is withdrawable (10% buffer remains)
+  - Distribution: 80% to partners/creators (split by `creatorTradingFeePercentage`), 20% to protocol
+
+- **Pausable Trading**: Added pausable trading functionality for partners
+  - New `PausableMode` enum: `NotPausable = 0`, `Pausable = 1`
+  - New `pausableMode` field in `ConfigParameters`
+  - New `pauseTrading()` method in `PartnerService` - partner can pause pool trading
+  - New `unpauseTrading()` method in `PartnerService` - partner can unpause pool trading
+  - Special behavior: When pausable mode is enabled AND trading is paused, partner can withdraw 100% of quote tokens
+  - Swap transactions blocked when pool is paused (error: `TradingIsPaused`)
+
+- **Existing Token Pool Support**: Create bonding curve pools with pre-existing tokens
+  - New `createPoolWithExistingSplToken()` method in `PoolService` - for SPL tokens
+  - New `createPoolWithExistingToken2022()` method in `PoolService` - for Token-2022 tokens
+  - Creator must own the existing token mint and have sufficient balance
+  - Token decimals must match config `tokenDecimal`
+  - Token type must match config `tokenType`
+
+- **Protocol Surplus Withdrawal**: Added protocol withdraw surplus functionality
+  - New `protocolWithdrawSurplus()` method in `PartnerService` - allows protocol to withdraw accumulated surplus
+  - Protocol receives 20% of surplus in NoMigration mode
+  - Automatically uses pool authority for withdrawals
+
+- **New Types**: Added parameter types for new functionality
+  - `PauseTradingParams` - for pause trading operation
+  - `UnpauseTradingParams` - for unpause trading operation
+  - `CreatePoolWithExistingTokenParams` - for existing token pool creation
+  - `ProtocolWithdrawSurplusParams` - for protocol surplus withdrawal
+
+- **Program IDs**: Added devnet program ID constant
+  - `DYNAMIC_BONDING_CURVE_PROGRAM_ID_DEVNET` - Devnet deployment at `FP72VdSGjvExv1cnz9TYeJZ1DXDeX9pBFEo574VaST8H`
+
+### Changed
+
+- Updated IDL to version 0.1.7 with new instructions and account structures
+- Updated `VirtualPool` account type to include `isPaused` field
+- Updated authority addresses for devnet deployment
+
+### Notes
+
+- NoMigration mode is ideal for projects that don't need DEX listing
+- Pausable mode provides emergency controls and flexible exit strategies
+- Existing token pools work with NoMigration mode for simplified launches
+- All new features are backward compatible with existing pools
+
 ## [1.4.9] - 2025-11-29
 
 ### Added

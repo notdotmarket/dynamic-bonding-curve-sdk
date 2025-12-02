@@ -22,7 +22,7 @@ export class DynamicBondingCurveProgram {
         const { program } = createDbcProgram(connection, commitment)
         this.program = program
         this.connection = connection
-        this.poolAuthority = deriveDbcPoolAuthority()
+        this.poolAuthority = deriveDbcPoolAuthority(program.programId)
         this.commitment = commitment
     }
 

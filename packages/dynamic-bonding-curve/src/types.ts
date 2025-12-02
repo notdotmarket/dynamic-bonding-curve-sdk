@@ -106,6 +106,7 @@ export enum DammV2DynamicFeeMode {
 export enum MigrationOption {
     MET_DAMM = 0,
     MET_DAMM_V2 = 1,
+    NO_MIGRATION = 2,
 }
 
 export enum BaseFeeMode {
@@ -158,6 +159,11 @@ export enum SwapMode {
     ExactIn = 0,
     PartialFill = 1,
     ExactOut = 2,
+}
+
+export enum PausableMode {
+    NotPausable = 0,
+    Pausable = 1,
 }
 
 ///////////
@@ -237,6 +243,7 @@ export type BuildCurveBaseParams = {
     creatorTradingFeePercentage: number
     leftover: number
     tokenUpdateAuthority: number
+    pausableMode?: PausableMode
     migrationFee: {
         feePercentage: number
         creatorFeePercentage: number
@@ -527,6 +534,10 @@ export type CreatorWithdrawSurplusParams = {
     virtualPool: PublicKey
 }
 
+export type ProtocolWithdrawSurplusParams = {
+    virtualPool: PublicKey
+}
+
 export type WithdrawLeftoverParams = {
     payer: PublicKey
     virtualPool: PublicKey
@@ -558,6 +569,23 @@ export type TransferPoolCreatorParams = {
 export type WithdrawMigrationFeeParams = {
     virtualPool: PublicKey
     sender: PublicKey // sender is creator or partner
+}
+
+export type PauseTradingParams = {
+    feeClaimer: PublicKey
+    virtualPool: PublicKey
+}
+
+export type UnpauseTradingParams = {
+    feeClaimer: PublicKey
+    virtualPool: PublicKey
+}
+
+export type CreatePoolWithExistingTokenParams = {
+    payer: PublicKey
+    config: PublicKey
+    poolCreator: PublicKey
+    existingTokenMint: PublicKey
 }
 
 ////////////////

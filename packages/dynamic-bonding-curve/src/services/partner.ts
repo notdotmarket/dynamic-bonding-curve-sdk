@@ -17,6 +17,9 @@ import {
     ClaimPartnerTradingFeeWithQuoteMintSolParams,
     ClaimTradingFee2Params,
     WithdrawMigrationFeeParams,
+    PauseTradingParams,
+    UnpauseTradingParams,
+    ProtocolWithdrawSurplusParams,
 } from '../types'
 import {
     derivePartnerMetadata,
@@ -625,5 +628,117 @@ export class PartnerService extends DynamicBondingCurveProgram {
             .transaction()
 
         return transaction
+    }
+
+    /**
+     * Pause trading on a virtual pool
+     * @param feeClaimer - The fee claimer (partner) address
+     * @param virtualPool - The virtual pool address
+     * @returns A pause trading transaction
+     * @requires pausableMode must be enabled (1) in config
+     * @requires signer must be the fee claimer
+     */
+    async pauseTrading(params: PauseTradingParams): Promise<Transaction> {
+        const { feeClaimer, virtualPool } = params
+
+        const virtualPoolState = await this.state.getPool(virtualPool)
+        if (!virtualPoolState) {
+            throw new Error(`Pool not found: ${virtualPool.toString()}`)
+        }
+
+        const configState = await this.state.getPoolConfig(
+            virtualPoolState.config
+        )
+        if (!configState) {
+            throw new Error(`Pool config not found for virtual pool`)
+        }
+
+        return this.program.methods
+            .pauseTrading()
+            .accountsPartial({
+                config: virtualPoolState.config,
+                pool: virtualPool,
+                feeClaimer,
+            })
+            .transaction()
+    }
+
+    /**
+     * Unpause trading on a virtual pool
+     * @param feeClaimer - The fee claimer (partner) address
+     * @param virtualPool - The virtual pool address
+     * @returns An unpause trading transaction
+     * @requires pausableMode must be enabled (1) in config
+     * @requires pool must be currently paused
+     * @requires signer must be the fee claimer
+     */
+    async unpauseTrading(params: UnpauseTradingParams): Promise<Transaction> {
+        const { feeClaimer, virtualPool } = params
+
+        const virtualPoolState = await this.state.getPool(virtualPool)
+        if (!virtualPoolState) {
+            throw new Error(`Pool not found: ${virtualPool.toString()}`)
+        }
+
+        const configState = await this.state.getPoolConfig(
+            virtualPoolState.config
+        )
+        if (!configState) {
+            throw new Error(`Pool config not found for virtual pool`)
+        }
+
+        return this.program.methods
+            .unpauseTrading()
+            .accountsPartial({
+                config: virtualPoolState.config,
+                pool: virtualPool,
+                feeClaimer,
+            })
+            .transaction()
+    }
+
+    /**
+     * Protocol withdraw surplus from a virtual pool
+     * Allows the protocol to withdraw accumulated surplus quote tokens
+     * @param params - ProtocolWithdrawSurplusParams containing virtualPool
+     * @returns A protocol withdraw surplus transaction
+     */
+    async protocolWithdrawSurplus(
+        params: ProtocolWithdrawSurplusParams
+    ): Promise<Transaction> {
+        const { virtualPool } = params
+
+        const poolState = await this.state.getPool(virtualPool)
+        if (!poolState) {
+            throw new Error(`Pool not found: ${virtualPool.toString()}`)
+        }
+
+        const poolConfigState = await this.state.getPoolConfig(poolState.config)
+        if (!poolConfigState) {
+            throw new Error(`Pool config not found for virtual pool`)
+        }
+
+        const tokenQuoteProgram = getTokenProgram(
+            poolConfigState.quoteTokenFlag
+        )
+
+        const tokenQuoteAccount = findAssociatedTokenAddress(
+            this.poolAuthority,
+            poolConfigState.quoteMint,
+            tokenQuoteProgram
+        )
+
+        return this.program.methods
+            .protocolWithdrawSurplus()
+            .accountsPartial({
+                poolAuthority: this.poolAuthority,
+                config: poolState.config,
+                virtualPool,
+                tokenQuoteAccount,
+                quoteVault: poolState.quoteVault,
+                quoteMint: poolConfigState.quoteMint,
+                tokenQuoteProgram,
+            })
+            .transaction()
     }
 }

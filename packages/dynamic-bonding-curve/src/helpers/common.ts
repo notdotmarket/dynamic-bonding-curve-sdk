@@ -364,6 +364,21 @@ export const getMigrationBaseToken = (
             Rounding.Up
         )
         return baseAmount
+    } else if (migrationOption == MigrationOption.NO_MIGRATION) {
+        // For NO_MIGRATION mode, calculate similar to MET_DAMM_V2
+        // but the migration threshold is just informational
+        const liquidity = getInitialLiquidityFromDeltaQuote(
+            migrationQuoteAmount,
+            MIN_SQRT_PRICE,
+            sqrtMigrationPrice
+        )
+        const baseAmount = getDeltaAmountBaseUnsigned(
+            sqrtMigrationPrice,
+            MAX_SQRT_PRICE,
+            liquidity,
+            Rounding.Up
+        )
+        return baseAmount
     } else {
         throw Error('Invalid migration option')
     }

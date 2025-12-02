@@ -7,6 +7,7 @@ import {
     METAPLEX_PROGRAM_ID,
     VAULT_PROGRAM_ID,
     DYNAMIC_BONDING_CURVE_PROGRAM_ID,
+    DYNAMIC_BONDING_CURVE_PROGRAM_ID_DEVNET,
 } from '../constants'
 import { getFirstKey, getSecondKey } from './common'
 
@@ -81,12 +82,13 @@ export function deriveLockerEventAuthority(): PublicKey {
 
 /**
  * Derive DBC pool authority
+ * @param programId - Optional program ID (defaults to mainnet for backwards compatibility)
  * @returns The pool authority
  */
-export function deriveDbcPoolAuthority(): PublicKey {
+export function deriveDbcPoolAuthority(programId?: PublicKey): PublicKey {
     const [poolAuthority] = PublicKey.findProgramAddressSync(
         [Buffer.from(SEED.POOL_AUTHORITY)],
-        DYNAMIC_BONDING_CURVE_PROGRAM_ID
+        programId || DYNAMIC_BONDING_CURVE_PROGRAM_ID
     )
 
     return poolAuthority
@@ -123,12 +125,14 @@ export function deriveDammV2PoolAuthority(): PublicKey {
  * @param quoteMint - The quote mint
  * @param baseMint - The base mint
  * @param config - The config
+ * @param programId - Optional program ID (defaults to devnet for backwards compatibility)
  * @returns The pool
  */
 export function deriveDbcPoolAddress(
     quoteMint: PublicKey,
     baseMint: PublicKey,
-    config: PublicKey
+    config: PublicKey,
+    programId?: PublicKey
 ): PublicKey {
     const isQuoteMintBiggerThanBaseMint =
         new PublicKey(quoteMint)
@@ -146,7 +150,7 @@ export function deriveDbcPoolAddress(
                 ? new PublicKey(baseMint).toBuffer()
                 : new PublicKey(quoteMint).toBuffer(),
         ],
-        DYNAMIC_BONDING_CURVE_PROGRAM_ID
+        DYNAMIC_BONDING_CURVE_PROGRAM_ID_DEVNET 
     )
 
     return pool
@@ -272,15 +276,17 @@ export function deriveDammV2MigrationMetadataAddress(
  * Derive DBC token vault address
  * @param pool - The pool
  * @param mint - The mint
+ * @param programId - Optional program ID (defaults to mainnet for backwards compatibility)
  * @returns The token vault
  */
 export function deriveDbcTokenVaultAddress(
     pool: PublicKey,
-    mint: PublicKey
+    mint: PublicKey,
+    programId?: PublicKey
 ): PublicKey {
     const [tokenVault] = PublicKey.findProgramAddressSync(
         [Buffer.from(SEED.TOKEN_VAULT), mint.toBuffer(), pool.toBuffer()],
-        DYNAMIC_BONDING_CURVE_PROGRAM_ID
+        programId || DYNAMIC_BONDING_CURVE_PROGRAM_ID
     )
 
     return tokenVault

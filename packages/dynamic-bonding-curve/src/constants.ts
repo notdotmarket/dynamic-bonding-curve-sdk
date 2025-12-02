@@ -28,8 +28,13 @@ export const MAX_RATE_LIMITER_DURATION_IN_SLOTS = 108000 // 12 hours
 export const SLOT_DURATION = 400
 export const TIMESTAMP_DURATION = 1000
 
+// Mainnet Program ID
 export const DYNAMIC_BONDING_CURVE_PROGRAM_ID = new PublicKey(
     'dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN'
+)
+// Devnet Program ID
+export const DYNAMIC_BONDING_CURVE_PROGRAM_ID_DEVNET = new PublicKey(
+    'FP72VdSGjvExv1cnz9TYeJZ1DXDeX9pBFEo574VaST8H'
 )
 export const METAPLEX_PROGRAM_ID = new PublicKey(
     'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'

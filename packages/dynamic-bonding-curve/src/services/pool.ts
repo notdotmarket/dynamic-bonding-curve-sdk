@@ -29,6 +29,7 @@ import {
     BaseFee,
     BaseFeeMode,
     ActivationType,
+    CreatePoolWithExistingTokenParams,
 } from '../types'
 import {
     deriveDbcPoolAddress,
@@ -42,6 +43,7 @@ import {
     validateConfigParameters,
     validateSwapAmount,
     getCurrentPoint,
+    findAssociatedTokenAddress,
 } from '../helpers'
 import { NATIVE_MINT, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token'
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token'
@@ -264,9 +266,9 @@ export class PoolService extends DynamicBondingCurveProgram {
         const { baseMint, name, symbol, uri, poolCreator, config, payer } =
             createPoolParam
 
-        const pool = deriveDbcPoolAddress(quoteMint, baseMint, config)
-        const baseVault = deriveDbcTokenVaultAddress(pool, baseMint)
-        const quoteVault = deriveDbcTokenVaultAddress(pool, quoteMint)
+        const pool = deriveDbcPoolAddress(quoteMint, baseMint, config, this.program.programId)
+        const baseVault = deriveDbcTokenVaultAddress(pool, baseMint, this.program.programId)
+        const quoteVault = deriveDbcTokenVaultAddress(pool, quoteMint, this.program.programId)
 
         const baseParams: InitializePoolBaseParams = {
             name,
@@ -360,9 +362,9 @@ export class PoolService extends DynamicBondingCurveProgram {
                 }
             )
 
-        const pool = deriveDbcPoolAddress(quoteMint, baseMint, config)
-        const baseVault = deriveDbcTokenVaultAddress(pool, baseMint)
-        const quoteVault = deriveDbcTokenVaultAddress(pool, quoteMint)
+        const pool = deriveDbcPoolAddress(quoteMint, baseMint, config, this.program.programId)
+        const baseVault = deriveDbcTokenVaultAddress(pool, baseMint, this.program.programId)
+        const quoteVault = deriveDbcTokenVaultAddress(pool, quoteMint, this.program.programId)
 
         const preInstructions: TransactionInstruction[] = []
 
@@ -471,9 +473,9 @@ export class PoolService extends DynamicBondingCurveProgram {
 
         const { quoteMint, tokenType } = poolConfigState
 
-        const pool = deriveDbcPoolAddress(quoteMint, baseMint, config)
-        const baseVault = deriveDbcTokenVaultAddress(pool, baseMint)
-        const quoteVault = deriveDbcTokenVaultAddress(pool, quoteMint)
+        const pool = deriveDbcPoolAddress(quoteMint, baseMint, config, this.program.programId)
+        const baseVault = deriveDbcTokenVaultAddress(pool, baseMint, this.program.programId)
+        const quoteVault = deriveDbcTokenVaultAddress(pool, quoteMint, this.program.programId)
 
         const baseParams: InitializePoolBaseParams = {
             name,
@@ -495,6 +497,121 @@ export class PoolService extends DynamicBondingCurveProgram {
         } else {
             return this.initializeToken2022Pool(baseParams)
         }
+    }
+
+    /**
+     * Create a new pool with an existing SPL token
+     * @param payer - The payer address
+     * @param config - The config address
+     * @param poolCreator - The pool creator address
+     * @param existingTokenMint - The existing token mint address
+     * @returns A new pool with existing SPL token
+     * @requires existingTokenMint must be owned by poolCreator
+     * @requires tokenType in config must be SPL (0)
+     * @requires poolCreator must have sufficient token balance
+     */
+    async createPoolWithExistingSplToken(
+        params: CreatePoolWithExistingTokenParams
+    ): Promise<Transaction> {
+        const { payer, config, poolCreator, existingTokenMint } = params
+
+        const poolConfigState = await this.state.getPoolConfig(config)
+        if (!poolConfigState) {
+            throw new Error(`Pool config not found`)
+        }
+
+        if (poolConfigState.tokenType !== TokenType.SPL) {
+            throw new Error(
+                'Config token type must be SPL for this instruction'
+            )
+        }
+
+        const { quoteMint } = poolConfigState
+
+        const pool = deriveDbcPoolAddress(quoteMint, existingTokenMint, config, this.program.programId)
+        const baseVault = deriveDbcTokenVaultAddress(pool, existingTokenMint, this.program.programId)
+        const quoteVault = deriveDbcTokenVaultAddress(pool, quoteMint, this.program.programId)
+        const mintMetadata = deriveMintMetadata(existingTokenMint)
+        const creatorTokenAccount = findAssociatedTokenAddress(
+            poolCreator,
+            existingTokenMint,
+            TOKEN_PROGRAM_ID
+        )
+
+        return this.program.methods
+            .initializeVirtualPoolWithExistingSplToken()
+            .accountsPartial({
+                pool,
+                config,
+                payer,
+                creator: poolCreator,
+                creatorTokenAccount,
+                baseMint: existingTokenMint,
+                poolAuthority: this.poolAuthority,
+                baseVault,
+                quoteVault,
+                quoteMint,
+                tokenQuoteProgram: TOKEN_PROGRAM_ID,
+                tokenProgram: TOKEN_PROGRAM_ID,
+            })
+            .transaction()
+    }
+
+    /**
+     * Create a new pool with an existing Token2022 token
+     * @param payer - The payer address
+     * @param config - The config address
+     * @param poolCreator - The pool creator address
+     * @param existingTokenMint - The existing token mint address
+     * @returns A new pool with existing Token2022 token
+     * @requires existingTokenMint must be owned by poolCreator
+     * @requires tokenType in config must be Token2022 (1)
+     * @requires poolCreator must have sufficient token balance
+     */
+    async createPoolWithExistingToken2022(
+        params: CreatePoolWithExistingTokenParams
+    ): Promise<Transaction> {
+        const { payer, config, poolCreator, existingTokenMint } = params
+
+        const poolConfigState = await this.state.getPoolConfig(config)
+        if (!poolConfigState) {
+            throw new Error(`Pool config not found`)
+        }
+
+        if (poolConfigState.tokenType !== TokenType.Token2022) {
+            throw new Error(
+                'Config token type must be Token2022 for this instruction'
+            )
+        }
+
+        const { quoteMint } = poolConfigState
+
+        const pool = deriveDbcPoolAddress(quoteMint, existingTokenMint, config, this.program.programId)
+        const baseVault = deriveDbcTokenVaultAddress(pool, existingTokenMint, this.program.programId)
+        const quoteVault = deriveDbcTokenVaultAddress(pool, quoteMint, this.program.programId)
+        const creatorTokenAccount = findAssociatedTokenAddress(
+            poolCreator,
+            existingTokenMint,
+            TOKEN_2022_PROGRAM_ID
+        )
+
+        return this.program.methods
+            .initializeVirtualPoolWithExistingToken2022()
+            .accountsPartial({
+                pool,
+                config,
+                payer,
+                creator: poolCreator,
+                creatorTokenAccount,
+                baseMint: existingTokenMint,
+                poolAuthority: this.poolAuthority,
+                baseVault,
+                quoteVault,
+                quoteMint,
+                tokenQuoteProgram: TOKEN_PROGRAM_ID,
+                tokenProgram: TOKEN_2022_PROGRAM_ID,
+            })
+            .transaction()
     }
 
     /**

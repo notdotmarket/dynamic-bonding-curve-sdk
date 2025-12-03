@@ -280,8 +280,9 @@ Accessible via `DAMM_V2_MIGRATION_FEE_ADDRESS[i]` in the SDK:
 
 ## Version History
 
-**Current Version**: 1.5.1
+**Current Version**: 1.5.2
 
+- **v1.5.2** - Documentation updates and README refresh
 - **v1.5.1** - NoMigration surplus percentage configuration
 - **v1.5.0** - NoMigration mode, pausable trading, existing token support, protocol surplus withdrawal
 - **v1.4.x** - Dynamic fees, rate limiting, vesting schedules

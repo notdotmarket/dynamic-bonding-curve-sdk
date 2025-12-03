@@ -3,6 +3,22 @@
 All notable changes to the Dynamic Bonding Curve SDK will be documented in this file.
 
 
+## [1.5.2] - 2025-12-03
+
+### Documentation
+
+- **README Updates**: Comprehensive documentation refresh
+  - Updated package name and branding throughout all documentation
+  - Added detailed feature list highlighting v1.5.1+ capabilities
+  - Created comprehensive quick start guide with code examples
+  - Documented NoMigration surplus percentage configuration with usage examples
+  - Added pausable trading code examples
+  - Reorganized migration flow sections for better clarity
+  - Added version history table and support information
+  - Improved formatting with tables for migration fee addresses
+  - Updated root README with monorepo structure and development instructions
+
+
 ## [1.5.1] - 2025-12-03
 
 ### Added

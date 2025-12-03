@@ -247,6 +247,8 @@ export type BuildCurveBaseParams = {
     noMigrationPartnerSurplusPercentage?: number
     noMigrationCreatorSurplusPercentage?: number
     noMigrationProtocolSurplusPercentage?: number
+    taxedSellingEnabled?: boolean
+    bondingCurveExpiryDays?: number
     migrationFee: {
         feePercentage: number
         creatorFeePercentage: number

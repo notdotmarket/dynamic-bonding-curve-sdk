@@ -4736,6 +4736,11 @@ export type DynamicBondingCurve = {
       "code": 6053,
       "name": "tradingIsNotPaused",
       "msg": "Trading is not paused"
+    },
+    {
+      "code": 6054,
+      "name": "bondingCurveExpired",
+      "msg": "Bonding curve has expired"
     }
   ],
   "types": [
@@ -5008,6 +5013,20 @@ export type DynamicBondingCurve = {
           {
             "name": "noMigrationProtocolSurplusPercentage",
             "type": "u8"
+          },
+          {
+            "name": "taxedSellingEnabled",
+            "docs": [
+              "Taxed selling - if enabled, 10% fee on sells"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "bondingCurveExpiryDays",
+            "docs": [
+              "Bonding curve expiry time in days (0 = no expiry, min = 1 day)"
+            ],
+            "type": "u32"
           },
           {
             "name": "padding",
@@ -6382,6 +6401,13 @@ export type DynamicBondingCurve = {
             "type": "u8"
           },
           {
+            "name": "taxedSellingEnabled",
+            "docs": [
+              "taxed selling enabled - if true, 10% trading fee on sells"
+            ],
+            "type": "u8"
+          },
+          {
             "name": "padding0",
             "docs": [
               "padding 0"
@@ -6389,7 +6415,7 @@ export type DynamicBondingCurve = {
             "type": {
               "array": [
                 "u8",
-                3
+                2
               ]
             }
           },
@@ -6482,9 +6508,16 @@ export type DynamicBondingCurve = {
           {
             "name": "padding2",
             "docs": [
-              "padding 2"
+              "padding 2 - reduced from u128 (16 bytes) to u64 (8 bytes)"
             ],
-            "type": "u128"
+            "type": "u64"
+          },
+          {
+            "name": "bondingCurveExpiryTime",
+            "docs": [
+              "bonding curve expiry time (Unix timestamp) - 0 means no expiry"
+            ],
+            "type": "i64"
           },
           {
             "name": "sqrtStartPrice",

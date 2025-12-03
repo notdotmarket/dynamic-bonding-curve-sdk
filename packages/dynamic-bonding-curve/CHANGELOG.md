@@ -3,6 +3,43 @@
 All notable changes to the Dynamic Bonding Curve SDK will be documented in this file.
 
 
+## [1.6.0] - 2025-12-03
+
+### Added
+
+- **Taxed Selling Feature**: Added support for taxed selling mode
+  - New `taxedSellingEnabled` field in `BuildCurveBaseParams` (optional, boolean)
+  - When enabled, applies 10% trading fee on sell transactions
+  - Defaults to `false` (disabled) if not specified
+  - Automatically converted to u8 (0 or 1) for on-chain program
+
+- **Bonding Curve Expiry**: Added configurable expiry time for bonding curves
+  - New `bondingCurveExpiryDays` field in `BuildCurveBaseParams` (optional, number)
+  - Specifies expiry time in days (0 = no expiry, min = 1 day)
+  - Defaults to `0` (no expiry) if not specified
+  - Prevents trading after expiry time is reached
+
+### Changed
+
+- Updated all `buildCurve*` functions to accept new optional parameters:
+  - `buildCurve()` 
+  - `buildCurveWithMarketCap()`
+  - `buildCurveWithTwoSegments()`
+  - `buildCurveWithMidPrice()`
+  - `buildCurveWithLiquidityWeights()`
+
+- Updated IDL to latest version (0.1.7) with new program features:
+  - Added `taxed_selling_enabled` field to ConfigParameters and PoolConfig
+  - Added `bonding_curve_expiry_days` field to ConfigParameters
+  - Added `bonding_curve_expiry_time` field to PoolConfig (Unix timestamp)
+
+### Notes
+
+- Both new features are **optional** and **backward compatible**
+- Existing code will continue to work without modifications
+- New fields default to safe values (taxed selling disabled, no expiry)
+
+
 ## [1.5.2] - 2025-12-03
 
 ### Documentation

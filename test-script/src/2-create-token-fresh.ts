@@ -87,6 +87,10 @@ async function main() {
         creatorTradingFeePercentage: CONFIG.FEE.CREATOR_TRADING_FEE_PERCENTAGE,
         leftover: 0,
         tokenUpdateAuthority: TokenUpdateAuthorityOption.PartnerUpdateAndMintAuthority,
+        pausableMode: PausableMode.Pausable,
+        noMigrationPartnerSurplusPercentage: 40,
+        noMigrationCreatorSurplusPercentage: 40,
+        noMigrationProtocolSurplusPercentage: 20,
         migrationFee: {
             feePercentage: 0,
             creatorFeePercentage: 0,

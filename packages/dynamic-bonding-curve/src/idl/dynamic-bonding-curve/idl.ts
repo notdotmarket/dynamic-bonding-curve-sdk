@@ -4995,6 +4995,21 @@ export type DynamicBondingCurve = {
             "type": "u8"
           },
           {
+            "name": "noMigrationPartnerSurplusPercentage",
+            "docs": [
+              "NoMigration mode surplus percentages (partner + creator + protocol should = 100)"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "noMigrationCreatorSurplusPercentage",
+            "type": "u8"
+          },
+          {
+            "name": "noMigrationProtocolSurplusPercentage",
+            "type": "u8"
+          },
+          {
             "name": "padding",
             "docs": [
               "padding for future use"
@@ -6346,6 +6361,27 @@ export type DynamicBondingCurve = {
             "type": "u8"
           },
           {
+            "name": "noMigrationPartnerSurplusPercentage",
+            "docs": [
+              "no migration surplus percentage for partner (0-100)"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "noMigrationCreatorSurplusPercentage",
+            "docs": [
+              "no migration surplus percentage for creator (0-100)"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "noMigrationProtocolSurplusPercentage",
+            "docs": [
+              "no migration surplus percentage for protocol (0-100)"
+            ],
+            "type": "u8"
+          },
+          {
             "name": "padding0",
             "docs": [
               "padding 0"
@@ -6353,7 +6389,7 @@ export type DynamicBondingCurve = {
             "type": {
               "array": [
                 "u8",
-                6
+                3
               ]
             }
           },

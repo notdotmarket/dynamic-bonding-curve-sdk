@@ -244,6 +244,9 @@ export type BuildCurveBaseParams = {
     leftover: number
     tokenUpdateAuthority: number
     pausableMode?: PausableMode
+    noMigrationPartnerSurplusPercentage?: number
+    noMigrationCreatorSurplusPercentage?: number
+    noMigrationProtocolSurplusPercentage?: number
     migrationFee: {
         feePercentage: number
         creatorFeePercentage: number

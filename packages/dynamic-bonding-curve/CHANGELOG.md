@@ -3,6 +3,27 @@
 All notable changes to the Dynamic Bonding Curve SDK will be documented in this file.
 
 
+## [1.5.1] - 2025-12-03
+
+### Added
+
+- **NoMigration Surplus Percentage Configuration**: Added configurable surplus distribution percentages for NoMigration mode
+  - New `noMigrationPartnerSurplusPercentage` field in `ConfigParameters` and `BuildCurveBaseParams`
+  - New `noMigrationCreatorSurplusPercentage` field in `ConfigParameters` and `BuildCurveBaseParams`
+  - New `noMigrationProtocolSurplusPercentage` field in `ConfigParameters` and `BuildCurveBaseParams`
+  - These percentages allow custom distribution of surplus in NoMigration mode (must sum to 100)
+  - Default values: 0 (uses on-chain default distribution)
+
+### Changed
+
+- Updated all `buildCurve*` functions to accept optional NoMigration surplus percentage parameters
+  - `buildCurve()`
+  - `buildCurveWithMarketCap()`
+  - `buildCurveWithTwoSegments()`
+  - `buildCurveWithMidPrice()`
+  - `buildCurveWithLiquidityWeights()`
+- Multiple withdrawals now supported in NoMigration mode (entities can withdraw multiple times)
+
 ## [1.5.0] - 2025-12-02
 
 ### Added

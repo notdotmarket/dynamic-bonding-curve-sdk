@@ -1,6 +1,6 @@
 {
   "name": "@notdotmarket/dynamic-bonding-curve-sdk",
-  "version": "1.4.9",
+  "version": "1.5.1",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "source": "src/index.ts",
@@ -11,17 +11,37 @@
     "dynamic-bonding-curve",
     "damm-v1",
     "damm-v2",
-    "dynamic-vaults"
+    "dynamic-vaults",
+    "solana",
+    "bonding-curve",
+    "token-launch"
   ],
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
   ],
   "description": "A Typescript SDK for interacting with the Dynamic Bonding Curve on Meteora.",
   "license": "MIT",
   "type": "module",
+  "publishConfig": {
+    "access": "restricted",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/notdotmarket/dynamic-bonding-curve-sdk.git",
+    "directory": "packages/dynamic-bonding-curve"
+  },
+  "bugs": {
+    "url": "https://github.com/notdotmarket/dynamic-bonding-curve-sdk/issues"
+  },
+  "homepage": "https://github.com/notdotmarket/dynamic-bonding-curve-sdk#readme",
   "scripts": {
     "build": "rm -rf dist && tsup src/index.ts --format esm,cjs --dts",
-    "clean": "rm -rf node_modules dist"
+    "clean": "rm -rf node_modules dist",
+    "prepublishOnly": "npm run build",
+    "publish:restricted": "npm publish --access restricted"
   },
   "exports": {
     ".": {

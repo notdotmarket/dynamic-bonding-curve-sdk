@@ -25,7 +25,7 @@
   "license": "MIT",
   "type": "module",
   "publishConfig": {
-    "access": "restricted",
+    "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
   "repository": {
@@ -41,7 +41,7 @@
     "build": "rm -rf dist && tsup src/index.ts --format esm,cjs --dts",
     "clean": "rm -rf node_modules dist",
     "prepublishOnly": "npm run build",
-    "publish:restricted": "npm publish --access restricted"
+    "publish:public": "npm publish --access public"
   },
   "exports": {
     ".": {

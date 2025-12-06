@@ -1,0 +1,61 @@
+{
+  "name": "@notdotmarket/dbc-hooks",
+  "version": "0.1.1",
+  "description": "React hooks for Dynamic Bonding Curve SDK with React Query integration",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "private": false,
+  "author": "notdotmarket",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/notdotmarket/dynamic-bonding-curve-sdk.git",
+    "directory": "packages/dbc-hooks"
+  },
+  "keywords": [
+    "solana",
+    "bonding-curve",
+    "react",
+    "hooks",
+    "react-query",
+    "defi",
+    "trading"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
+    "prepublishOnly": "bun run build"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "peerDependencies": {
+    "@solana/web3.js": "^1.95.0",
+    "@tanstack/react-query": "^5.0.0",
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "dependencies": {
+    "@notdotmarket/dynamic-bonding-curve-sdk": "^1.6.0",
+    "bn.js": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/react": "^19.2.7",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  }
+}

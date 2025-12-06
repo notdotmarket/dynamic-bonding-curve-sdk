@@ -8,7 +8,9 @@
     - [claimPartnerTradingFee](#claimPartnerTradingFee)
     - [claimPartnerTradingFee2](#claimPartnerTradingFee2)
     - [partnerWithdrawSurplus](#partnerWithdrawSurplus)
+    - [partnerWithdrawBaseNoMigration](#partnerWithdrawBaseNoMigration)
     - [partnerWithdrawMigrationFee](#partnerWithdrawMigrationFee)
+    - [protocolWithdrawSurplus](#protocolWithdrawSurplus)
 
 - [Build Curve Functions](#build-curve-functions)
     - [buildCurve](#buildCurve)
@@ -546,6 +548,86 @@ const transaction = await client.partner.partnerWithdrawSurplus({
 **Notes**
 
 - The feeClaimer of the pool must be the same as the feeClaimer in the `PartnerWithdrawSurplusParam` params.
+
+---
+
+### partnerWithdrawBaseNoMigration
+
+Withdraws the partner's accumulated base token fees from the pool in NoMigration mode.
+
+**Function**
+
+```typescript
+async partnerWithdrawBaseNoMigration(params: PartnerWithdrawBaseNoMigrationParams): Promise<Transaction>
+```
+
+**Parameters**
+
+```typescript
+interface PartnerWithdrawBaseNoMigrationParams {
+    feeClaimer: PublicKey // The wallet that will claim the base token fees
+    virtualPool: PublicKey // The virtual pool address
+}
+```
+
+**Returns**
+
+- A transaction that can be signed and sent to the network.
+
+**Example**
+
+```typescript
+const transaction = await client.partner.partnerWithdrawBaseNoMigration({
+    feeClaimer: new PublicKey('boss1234567890abcdefghijklmnopqrstuvwxyz'),
+    virtualPool: new PublicKey('abcdefghijklmnopqrstuvwxyz1234567890'),
+})
+```
+
+**Notes**
+
+- The feeClaimer of the pool must be the same as the feeClaimer in the config key.
+- This function is only available for pools in NoMigration mode.
+- Allows partners to withdraw accumulated base token fees from trading activity.
+
+---
+
+### protocolWithdrawSurplus
+
+Withdraws the protocol's surplus from the pool to the treasury address.
+
+**Function**
+
+```typescript
+async protocolWithdrawSurplus(params: ProtocolWithdrawSurplusParams): Promise<Transaction>
+```
+
+**Parameters**
+
+```typescript
+interface ProtocolWithdrawSurplusParams {
+    feeClaimer: PublicKey // The wallet that will sign the transaction
+    virtualPool: PublicKey // The virtual pool address
+}
+```
+
+**Returns**
+
+- A transaction that can be signed and sent to the network.
+
+**Example**
+
+```typescript
+const transaction = await client.partner.protocolWithdrawSurplus({
+    feeClaimer: new PublicKey('boss1234567890abcdefghijklmnopqrstuvwxyz'),
+    virtualPool: new PublicKey('abcdefghijklmnopqrstuvwxyz1234567890'),
+})
+```
+
+**Notes**
+
+- This function requires the pool authority (PDA) as a signer.
+- Protocol surplus is sent to the treasury address (`TREASURY_ADDRESS`).
+- The feeClaimer must have the authority to execute protocol withdrawals.
 
 ---
 
@@ -4015,3 +4097,40 @@ const quoteReserve = getQuoteReserveFromNextSqrtPrice(
 
 - The `nextSqrtPrice` is the next sqrt price that you can fetch from swap cpi logs.
 - The `config` is the pool config that the token pool used to launch.
+
+---
+
+## Constants
+
+The SDK exports several important constants for use in your applications.
+
+### TREASURY_ADDRESS
+
+The treasury address for protocol surplus withdrawals.
+
+**Type**
+
+```typescript
+TREASURY_ADDRESS: PublicKey
+```
+
+**Value**
+
+```typescript
+DyEWZuwdgvYCLtqcnBPStcEKrqhbuymTCVXD6m47uXSx
+```
+
+**Usage**
+
+```typescript
+import { TREASURY_ADDRESS } from '@notdotmarket/dynamic-bonding-curve-sdk'
+
+console.log('Treasury Address:', TREASURY_ADDRESS.toBase58())
+// Output: DyEWZuwdgvYCLtqcnBPStcEKrqhbuymTCVXD6m47uXSx
+```
+
+**Notes**
+
+- This is the hardcoded destination address for all protocol surplus withdrawals.
+- Protocol fees from `protocolWithdrawSurplus` are sent to this address.
+- The treasury address is managed by the protocol and cannot be changed at the pool level.

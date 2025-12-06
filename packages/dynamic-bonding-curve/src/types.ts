@@ -534,6 +534,11 @@ export type PartnerWithdrawSurplusParams = {
     virtualPool: PublicKey
 }
 
+export type PartnerWithdrawBaseNoMigrationParams = {
+    feeClaimer: PublicKey
+    virtualPool: PublicKey
+}
+
 export type CreatorWithdrawSurplusParams = {
     creator: PublicKey
     virtualPool: PublicKey

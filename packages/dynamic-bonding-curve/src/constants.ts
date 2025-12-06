@@ -55,6 +55,11 @@ export const BASE_ADDRESS = new PublicKey(
     'HWzXGcGHy4tcpYfaRDCyLNzXqBTv3E6BttpCH2vJxArv'
 )
 
+// Treasury address for protocol withdrawals
+export const TREASURY_ADDRESS = new PublicKey(
+    'DyEWZuwdgvYCLtqcnBPStcEKrqhbuymTCVXD6m47uXSx'
+)
+
 // Dynamic Fee
 export const DYNAMIC_FEE_FILTER_PERIOD_DEFAULT = 10 // 10 seconds
 export const DYNAMIC_FEE_DECAY_PERIOD_DEFAULT = 120 // 120 seconds

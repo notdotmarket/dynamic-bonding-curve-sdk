@@ -13,6 +13,7 @@ import {
     type CreatePartnerMetadataParams,
     type CreatePartnerMetadataParameters,
     type PartnerWithdrawSurplusParams,
+    type PartnerWithdrawBaseNoMigrationParams,
     ClaimPartnerTradingFeeWithQuoteMintNotSolParams,
     ClaimPartnerTradingFeeWithQuoteMintSolParams,
     ClaimTradingFee2Params,
@@ -33,8 +34,10 @@ import {
 import {
     createAssociatedTokenAccountIdempotentInstruction,
     NATIVE_MINT,
+    TOKEN_PROGRAM_ID,
 } from '@solana/spl-token'
 import { StateService } from './state'
+import { TREASURY_ADDRESS } from '../constants'
 
 export class PartnerService extends DynamicBondingCurveProgram {
     private state: StateService
@@ -569,6 +572,60 @@ export class PartnerService extends DynamicBondingCurveProgram {
     }
 
     /**
+     * Partner withdraw base tokens in NoMigration mode
+     * Allows partner to withdraw accumulated base token fees from a NoMigration pool
+     * @param feeClaimer - The partner's fee claimer address
+     * @param virtualPool - The virtual pool address
+     * @returns A partner withdraw base no migration transaction
+     */
+    async partnerWithdrawBaseNoMigration(
+        params: PartnerWithdrawBaseNoMigrationParams
+    ): Promise<Transaction> {
+        const { virtualPool, feeClaimer } = params
+
+        const poolState = await this.state.getPool(virtualPool)
+        if (!poolState) {
+            throw new Error(`Pool not found: ${virtualPool.toString()}`)
+        }
+
+        const poolConfigState = await this.state.getPoolConfig(poolState.config)
+        if (!poolConfigState) {
+            throw new Error(`Pool config not found for virtual pool`)
+        }
+
+        const tokenBaseProgram = getTokenProgram(poolConfigState.tokenType)
+
+        const preInstructions: TransactionInstruction[] = []
+
+        const { ataPubkey: tokenBaseAccount, ix: createBaseTokenAccountIx } =
+            await getOrCreateATAInstruction(
+                this.connection,
+                poolState.baseMint,
+                feeClaimer,
+                feeClaimer,
+                true,
+                tokenBaseProgram
+            )
+
+        createBaseTokenAccountIx && preInstructions.push(createBaseTokenAccountIx)
+
+        return this.program.methods
+            .partnerWithdrawBaseNoMigration()
+            .accountsPartial({
+                poolAuthority: this.poolAuthority,
+                config: poolState.config,
+                virtualPool,
+                tokenBaseAccount,
+                baseVault: poolState.baseVault,
+                baseMint: poolState.baseMint,
+                feeClaimer,
+                tokenBaseProgram,
+            })
+            .preInstructions(preInstructions)
+            .transaction()
+    }
+
+    /**
      * Partner withdraw migration fee
      * @param virtualPool - The virtual pool address
      * @param sender - The sender of the pool
@@ -699,9 +756,10 @@ export class PartnerService extends DynamicBondingCurveProgram {
 
     /**
      * Protocol withdraw surplus from a virtual pool
-     * Allows the protocol to withdraw accumulated surplus quote tokens
+     * Allows the protocol to withdraw accumulated surplus quote tokens to the treasury
      * @param params - ProtocolWithdrawSurplusParams containing virtualPool
      * @returns A protocol withdraw surplus transaction
+     * @note This transaction requires the pool authority (PDA) as the signer
      */
     async protocolWithdrawSurplus(
         params: ProtocolWithdrawSurplusParams
@@ -722,11 +780,21 @@ export class PartnerService extends DynamicBondingCurveProgram {
             poolConfigState.quoteTokenFlag
         )
 
-        const tokenQuoteAccount = findAssociatedTokenAddress(
-            this.poolAuthority,
-            poolConfigState.quoteMint,
-            tokenQuoteProgram
-        )
+        const preInstructions: TransactionInstruction[] = []
+
+        // Get treasury's quote token account (ATA)
+        const { ataPubkey: tokenQuoteAccount, ix: createQuoteTokenAccountIx } =
+            await getOrCreateATAInstruction(
+                this.connection,
+                poolConfigState.quoteMint,
+                TREASURY_ADDRESS,
+                TREASURY_ADDRESS,
+                true, // allowOwnerOffCurve
+                tokenQuoteProgram
+            )
+
+        createQuoteTokenAccountIx &&
+            preInstructions.push(createQuoteTokenAccountIx)
 
         return this.program.methods
             .protocolWithdrawSurplus()
@@ -739,6 +807,7 @@ export class PartnerService extends DynamicBondingCurveProgram {
                 quoteMint: poolConfigState.quoteMint,
                 tokenQuoteProgram,
             })
+            .preInstructions(preInstructions)
             .transaction()
     }
 }

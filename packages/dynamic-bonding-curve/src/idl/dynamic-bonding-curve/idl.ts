@@ -2975,6 +2975,107 @@ export type DynamicBondingCurve = {
       "args": []
     },
     {
+      "name": "partnerWithdrawBaseNoMigration",
+      "discriminator": [
+        105,
+        185,
+        10,
+        210,
+        173,
+        58,
+        124,
+        36
+      ],
+      "accounts": [
+        {
+          "name": "poolAuthority",
+          "address": "Ct3uDieBmMgfyzNYAfSUwSZ8HeGxgX9zaWkdnk8xEwon"
+        },
+        {
+          "name": "config",
+          "relations": [
+            "virtualPool"
+          ]
+        },
+        {
+          "name": "virtualPool",
+          "writable": true
+        },
+        {
+          "name": "tokenBaseAccount",
+          "docs": [
+            "The receiver token account"
+          ],
+          "writable": true
+        },
+        {
+          "name": "baseVault",
+          "docs": [
+            "The vault token account for base token"
+          ],
+          "writable": true,
+          "relations": [
+            "virtualPool"
+          ]
+        },
+        {
+          "name": "baseMint",
+          "docs": [
+            "The mint of base token"
+          ],
+          "relations": [
+            "virtualPool"
+          ]
+        },
+        {
+          "name": "feeClaimer",
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "tokenBaseProgram",
+          "docs": [
+            "Token base program"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "partnerWithdrawSurplus",
       "discriminator": [
         168,
@@ -4440,6 +4541,19 @@ export type DynamicBondingCurve = {
       ]
     },
     {
+      "name": "evtWithdrawBaseNoMigration",
+      "discriminator": [
+        240,
+        228,
+        244,
+        58,
+        43,
+        131,
+        150,
+        124
+      ]
+    },
+    {
       "name": "evtWithdrawLeftover",
       "discriminator": [
         191,
@@ -5794,6 +5908,22 @@ export type DynamicBondingCurve = {
           {
             "name": "virtualPool",
             "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "evtWithdrawBaseNoMigration",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pool",
+            "type": "pubkey"
+          },
+          {
+            "name": "baseAmount",
+            "type": "u64"
           }
         ]
       }

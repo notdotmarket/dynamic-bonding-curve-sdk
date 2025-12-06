@@ -29,6 +29,15 @@ All notable changes to the Dynamic Bonding Curve SDK will be documented in this 
   - `buildCurveWithLiquidityWeights()`
 
 - Updated IDL to latest version (0.1.7) with new program features:
+
+### Fixed
+
+- **Protocol Withdrawal Bug**: Fixed `protocolWithdrawSurplus()` method
+  - Now properly creates associated token account (ATA) if it doesn't exist
+  - Added pre-instructions to create ATA using `getOrCreateATAInstruction()`
+  - Added post-instructions to unwrap SOL for native mint withdrawals
+  - Matches the pattern used in `partnerWithdrawSurplus()` method
+  - Resolves "AccountNotInitialized" error (Error 3012) when withdrawing protocol fees
   - Added `taxed_selling_enabled` field to ConfigParameters and PoolConfig
   - Added `bonding_curve_expiry_days` field to ConfigParameters
   - Added `bonding_curve_expiry_time` field to PoolConfig (Unix timestamp)
